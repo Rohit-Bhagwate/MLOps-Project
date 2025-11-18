@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Diabetes Prediction</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin:auto; }
+      label { display:block; margin-top:10px; }
+      input { width: 100%; padding: 8px; }
+      .result { margin-top:20px; padding:10px; border-radius:6px; background:#f3f3f3; }
+    </style>
+  </head>
+  <body>
+    <h2>Diabetes Prediction (Random Forest)</h2>
+    <form method="post">
+      {% for f in features %}
+        <label>{{f}} <input name="{{f}}" step="any" required /></label>
+      {% endfor %}
+      <button type="submit" style="margin-top:10px;">Predict</button>
+    </form>
+
+    {% if result %}
+      <div class="result">
+        <strong>Result:</strong> {{result}}<br/>
+        {% if prob is not none %}
+          Probability (model): {{'%.3f' % prob}}
+        {% endif %}
+      </div>
+    {% endif %}
+  </body>
+</html>

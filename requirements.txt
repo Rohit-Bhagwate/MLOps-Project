@@ -3,7 +3,7 @@ numpy
 scikit-learn
 flask
 joblib
-matplotlib
-seaborn
-kaggle
-mlflow
+#matplotlib
+#seaborn
+#kaggle
+#mlflow

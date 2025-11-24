@@ -144,6 +144,7 @@ ENV/
 mlops/
 env.bak/
 venv.bak/
+mlruns
 
 # Spyder project settings
 .spyderproject

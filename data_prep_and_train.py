@@ -21,10 +21,10 @@ print(df.head())
 
 # --- QUICK EDA (optional) ---
 print(df.describe())
-
+df.drop(['SkinThickness','Insulin'], axis=1, inplace=True)
 # --- CLEANING ---
 # In this dataset, some features have 0 as placeholder for missing:
-zero_as_missing = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]
+zero_as_missing = ["Glucose", "BloodPressure", "BMI"]
 # Replace 0 with np.nan
 for col in zero_as_missing:
     df[col] = df[col].replace(0, np.nan)

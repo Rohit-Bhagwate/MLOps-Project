@@ -11,7 +11,7 @@ SCALER_PATH = "models/scaler.pkl"
 model = joblib.load(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
 
-FEATURES = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigreeFunction","Age"]
+FEATURES = ["Pregnancies","Glucose","BloodPressure","BMI","DiabetesPedigreeFunction","Age"]
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -31,4 +31,4 @@ def index():
     return render_template("index.html", features=FEATURES, result=result, prob=prob)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)

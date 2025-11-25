@@ -1,37 +1,61 @@
-# eval.py
-import pandas as pd
-import joblib
-import json
+import argparse
 import os
+import joblib
+import pandas as pd
+import tarfile
+import json
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import StandardScaler
 
-model_path = "/opt/ml/processing/model/model.joblib"
-scaler_path = "/opt/ml/processing/model/scaler.joblib"
-test_path = "/opt/ml/processing/test/test.csv"
-output_dir = "/opt/ml/processing/output"
-os.makedirs(output_dir, exist_ok=True)
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output-data-dir', type=str, default='/opt/ml/processing/output')
+    parser.add_argument('--model-dir', type=str, default='/opt/ml/processing/model')
+    parser.add_argument('--test', type=str, default='/opt/ml/processing/test')
+    return parser.parse_args()
 
-# Load artifacts
-model = joblib.load(model_path)
-scaler = joblib.load(scaler_path)
-test_df = pd.read_csv(test_path)
+def extract_model(model_dir):
+    # Path to the model tar.gz file
+    model_tar_path = os.path.join(model_dir, 'model.tar.gz')
+    
+    # Extract the tar.gz file
+    with tarfile.open(model_tar_path, 'r:gz') as tar:
+        tar.extractall(path=model_dir)
+    
+    # Return the path to the extracted model
+    return os.path.join(model_dir, "model.joblib")
 
-X_test = test_df.drop("Outcome", axis=1)
-y_test = test_df["Outcome"]
-X_test_scaled = scaler.transform(X_test)
+if __name__ == "__main__":
+    args = _parse_args()
 
-# Predict
-y_pred = model.predict(X_test_scaled)
-acc = accuracy_score(y_test, y_pred)
+    # Extract and load the model
+    model_path = extract_model(args.model_dir)
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found at {model_path}")
 
-# Create evaluation.json
-report_dict = {
-    "accuracy": acc,
-    "classification_report": classification_report(y_test, y_pred, output_dict=True)
-}
+    model = joblib.load(model_path)
 
-with open(os.path.join(output_dir, "evaluation.json"), "w") as f:
-    json.dump(report_dict, f)
+    # Load test data
+    test_data = pd.read_csv(os.path.join(args.test, "diabetes_test.csv"))
+    test_x = test_data.iloc[:, :-1]
+    test_y = test_data.iloc[:, -1]
 
-print("✅ Evaluation complete. Accuracy:", acc)
+    # Make predictions
+    predictions = model.predict(test_x)
+
+    # Evaluate the model
+    accuracy = accuracy_score(test_y, predictions)
+    report = classification_report(test_y, predictions, output_dict=True)
+
+    # Write out evaluation report
+    evaluation_output_dir = args.output_data_dir
+    os.makedirs(evaluation_output_dir, exist_ok=True)
+    
+    with open(os.path.join(evaluation_output_dir, "evaluation.json"), "w") as f:
+        json.dump({"accuracy": accuracy, "classification_report": report}, f)
+
+    print(f"Model accuracy: {accuracy:.4f}")
+
+    # Write accuracy to a separate file for the pipeline condition
+    with open(os.path.join(evaluation_output_dir, "accuracy.json"), "w") as f:
+        json.dump({"accuracy": accuracy}, f)

@@ -5,7 +5,7 @@ import numpy as np
 
 app = Flask(__name__)
 
-MODEL_PATH = "models/model.pkl"
+MODEL_PATH = "models/model.joblib"
 SCALER_PATH = "models/scaler.pkl"
 
 model = joblib.load(MODEL_PATH)

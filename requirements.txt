@@ -1,6 +1,6 @@
 pandas
 numpy
-scikit-learn>=1.4.0
+scikit-learn==1.2.1
 flask
 joblib
 #matplotlib
